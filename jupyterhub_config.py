@@ -18,6 +18,9 @@ class PatchedDockerSpawner(dockerspawner.DockerSpawner):
     # We need the server to know what image it is using.
     # The KubeSpawner already does this, added in
     # https://github.com/jupyterhub/kubespawner/pull/193
+    #
+    # Submitted upstream to dockerspawner in
+    # https://github.com/jupyterhub/dockerspawner/pull/316
     def get_env(self):
         env = super().get_env()
         env['JUPYTER_IMAGE_SPEC'] = self.image

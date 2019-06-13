@@ -134,3 +134,6 @@ doc/source/generated/*.rst
 jupyterhub_cookie_secret
 jupyterhub-proxy.pid
 jupyterhub.sqlite
+
+# files craeted when keys are generated in place for local testing
+*.pem

@@ -27,36 +27,36 @@ availability of a specific image.
 ## Try it
 
 1. Start JupyterHub using the configuration in this repo.
-2. Log in with any username and password. (The ``DummyAuthenticator`` is used by
-   this demo configuration.)
-3. Create and save a notebook to share.
-4. Open a separate browser and log in to the hub as a different user.
+2. Log in with any username and password---for example, ``alice``.
+   (The ``DummyAuthenticator`` is used by this demo configuration.)
+3. Spawn a server using the ``base`` image.
+4. Create and save a notebook ``Untitled.ipynb`` to share.
 5. ``GET`` the following URL:
 
    ```
-   /services/share-link/{source_user}/{source_server_name}/{source_image_name}/{path}
+   /services/share-link/create/alice/base/Untitled.ipynb
    ```
-6. The user will have a new server started running the same image as User A, and
-   the notebook will be copied and opened.
+
+   This returns a shareable link that will be valid for one hour.
+6. Log in as a different user and enter the shared link.
+6. The user will have a new server started running the same image as ``alice``,
+   and the notebook will be copied and opened.
 
 ## Design
 
 This involves:
 
 * A stateless Hub Service (this repo)
+* A public/private key pair that belong to the service, enabling to verify that
+  shared links are valid.
 * A small notebook server extension for exposing ``JUPYTER_IMAGE_SPEC``, an
   environment variable in a new server REST endpoint.
   https://github.com/danielballan/jupyter-expose-image-spec
 
 ## TODO
 
-* Add URL For *creating* share links. Can servers be made to know which image
-  they are running?
 * Reuse an existing server for the destination if it has the right "profile" /
   image.
-* Add link expiration time.
-* Add utility CLI for generating keys using ``cryptography``.
-* Sign with JWT to ensure recipient cannot tamper with path or time.
 
 ## Open Questions
 
