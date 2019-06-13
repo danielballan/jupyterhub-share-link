@@ -15,6 +15,7 @@ from tornado.web import authenticated
 from tornado.web import RequestHandler
 
 from jupyterhub.services.auth import HubAuthenticated
+from jupyterhub.utils import url_path_join
 
 from .launcher import Launcher
 
@@ -39,25 +40,32 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
         result = await launcher.launch(image, dest_server_name)
 
         if result['status'] == 'pending':
-            here = (f"{os.getenv('JUPYTERHUB_SERVICE_URL')}/{source_username}/"
-                    f"{source_server_name}/{image}/{source_path}")
+            here = url_path_join(os.getenv('JUPYTERHUB_SERVICE_URL'),
+                                 source_username,
+                                 source_server_name,
+                                 image,
+                                 source_path)
             redirect_url = f"{result['url']}?next={urlquote(here)}"
             # Redirect to progress bar, and then back here to try again.
             self.redirect(redirect_url)
         assert result['status'] == 'running'
 
         resp = await launcher.api_request(
-            f'users/{source_username}',
+            url_path_join('users', source_username),
             method='GET',
         )
         source_user_data = json.loads(resp.body.decode('utf-8'))
-        print('USER DATA', source_user_data)
-
         source_server_url = source_user_data['servers'][source_server_name]['url']
-        base_url = os.getenv('JUPYTERHUB_API_URL', '')[:-7]
-        # HACK to avoid confusing /hub/ -> / -> /hub -> ... redirect loop
-        base_url = "http://127.0.0.1:8000"
-        content_url = f'{base_url}/{source_server_url}api/contents/{source_path}'
+
+        # HACK
+        # The Jupyter Hub API only gives us a *relative* path to the user
+        # servers. Use self.request to get at the public proxy URL.
+        base_url = f'{self.request.protocol}://{self.request.host}'
+
+        content_url = url_path_join(base_url,
+                                    source_server_url,
+                                    'api/contents',
+                                    source_path)
         headers = {'Authorization': f'token {launcher.hub_api_token}'}
         req = HTTPRequest(content_url, headers=headers)
         resp = await AsyncHTTPClient().fetch(req)
@@ -65,8 +73,12 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
 
         # Copy content into destination server.
         to_username = launcher.user['name']
-        dest_url = (f'{base_url}/user/{to_username}/{dest_server_name}/'
-                    f'api/contents/{dest_path}')
+        dest_url = url_path_join(base_url,
+                                 'user',
+                                 to_username,
+                                 dest_server_name,
+                                 'api/contents/',
+                                 dest_path)
         req = HTTPRequest(dest_url, "PUT", headers=headers, body=content)
         resp = await AsyncHTTPClient().fetch(req)
 

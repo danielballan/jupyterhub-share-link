@@ -41,7 +41,6 @@ availability of a specific image.
 
 ## TODO
 
-* Clean up base url hack.
 * Add URL For *creating* share links. Can servers be made to know which image
   they are running?
 * Reuse an existing server for the destination if it has the right "profile" /
