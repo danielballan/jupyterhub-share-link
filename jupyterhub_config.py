@@ -1,6 +1,9 @@
 import os
 import sys
 
+import dockerspawner
+
+
 c.JupyterHub.services = [
     {
         'name': 'share-link',
@@ -10,8 +13,18 @@ c.JupyterHub.services = [
     }
 ]
 
-# c.JupyterHub.spawner_class = 'dockerspawner.SystemUserSpawner'
-c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
+
+class PatchedDockerSpawner(dockerspawner.DockerSpawner):
+    # We need the server to know what image it is using.
+    # The KubeSpawner already does this, added in
+    # https://github.com/jupyterhub/kubespawner/pull/193
+    def get_env(self):
+        env = super().get_env()
+        env['JUPYTER_IMAGE_SPEC'] = self.image
+        return env
+
+
+c.JupyterHub.spawner_class = PatchedDockerSpawner
 c.DockerSpawner.remove_containers = True
 c.DockerSpawner.image_whitelist = {
     'base': 'jupyter/base-notebook',
