@@ -11,18 +11,17 @@ the file is copied from your notebook server to theirs. If you change the file,
 the recipient can click the link again to make another copy reflecting the
 changes. After a given time interval, the link expires.
 
-This is for low-effort, short-term sharing between users who are on the same
-Hub using a container-based spawner. It is not a good fit for long-term sharing.
+This is for low-effort, short-term sharing between users who are on the same Hub
+using a container-based spawner. The share link encodes both the notebook and
+the *container* that the sender was running that notebook in. The recipient will
+automatically be directed to a server running that same container, and thus have
+some assurance that they will be running the notebook in a compatible software
+environment. (This is not the case when sharing notebooks via email or Dropbox.)
 
-This is an improvement over using email or Dropbox to share notebooks because
-the share link encodes both the notebook and the *container* that the sender was
-running that notebook in. The recipient will automatically be directed to a
-server running that same container, and thus have some assurance that they
-will be running the notebook in a compatible software environment.
-
-This approach is not suitable for galleries or lists of links to be maintained
-long term. For those use cases, it is better to encode software dependencies (as
-in a Binder repo) rather than relying on the availability of a specific image.
+This approach is not suitable for persistent sharing, such as galleries or lists
+of links to be maintained long term. For those use cases, it is better to encode
+software dependencies (as in a Binder repo) rather than relying on the
+availability of a specific image.
 
 ## Try it
 
