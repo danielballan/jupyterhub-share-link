@@ -39,6 +39,15 @@ availability of a specific image.
 6. The user will have a new server started running the same image as User A, and
    the notebook will be copied and opened.
 
+## Design
+
+This involves:
+
+* A stateless Hub Service (this repo)
+* A small notebook server extension for exposing ``JUPYTER_IMAGE_SPEC``, an
+  environment variable in a new server REST endpoint.
+  https://github.com/danielballan/jupyter-expose-image-spec
+
 ## TODO
 
 * Add URL For *creating* share links. Can servers be made to know which image
