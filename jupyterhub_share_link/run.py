@@ -29,7 +29,8 @@ class CreateSharedLink(HubAuthenticated, RequestHandler):
 class OpenSharedLink(HubAuthenticated, RequestHandler):
     @authenticated
     async def get(self, source_username, source_server_name, image, source_path):
-        dest_path = self.get_argument('dest_path', source_path)
+        dest_path = self.get_argument('dest_path',
+                                      os.path.basename(source_path))
         launcher = Launcher(self.get_current_user(), self.hub_auth.api_token)
 
         # Ensure destination has a server to share into.
