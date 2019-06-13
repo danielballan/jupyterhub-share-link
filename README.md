@@ -37,6 +37,17 @@ availability of a specific image.
    /services/share-link/create/alice/base/Untitled.ipynb
    ```
 
+   generically:
+
+
+   ```
+   /services/share-link/create/<username>/<image-spec>/<path/to/file>
+   ```
+
+   It also accepts an optional ``expiration_time`` query parameter, which
+   defaults to one hour from the current time and may not exceed two days. It
+   should should specify time as UNIX Epoch UTC.
+
    This returns a shareable link that will be valid for one hour.
 6. Log in as a different user and enter the shared link.
 6. The user will have a new server started running the same image as ``alice``,

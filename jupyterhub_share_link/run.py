@@ -2,7 +2,7 @@
 This serves `/services/whoami/`, authenticated with the Hub, showing the user their own info.
 """
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta
 from getpass import getuser
 import json
 import os
@@ -36,16 +36,24 @@ class CreateSharedLink(HubAuthenticated, RequestHandler):
         server_name = self.get_argument('server_name', '')
 
         # Default to one hour lifetime.
-        default_expiration_time = datetime.utcnow().timestamp() + 3600
-        expiration_time = float(self.get_argument('expiration_time',
-                                                  default_expiration_time))
+        now = datetime.utcnow()
+        default_expiration_time = now + timedelta(hours=1)
+        expiration_time = datetime.fromtimestamp(
+            float(self.get_argument('expiration_time', default_expiration_time.timestamp())))
+        # Enforce a max of two days. This is not for long-term sharing, galleries, etc.
+        max_time = now + timedelta(days=2)
+        if expiration_time > max_time:
+            raise HTTPError(
+                403, (f"expiration_time must no more than two days "
+                      f"from now (current max: {max_time.timestamp()})")
+            )
 
         payload = {
             'user': user,
             'image': image,
             'path': path,
             'server_name': server_name,
-            'exp': datetime.fromtimestamp(expiration_time)
+            'exp': expiration_time
         }
         token = jwt.encode(payload, private_key, algorithm="RS256")
         base64_token = base64.urlsafe_b64encode(token)
