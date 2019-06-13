@@ -1,0 +1,4 @@
+* Escape redirect loop designed to rediret Bob who pasted Alice's URL.
+* Figure out how to wait for spawn and then POST content.
+* Add expiration time.
+* Sign with JWT in URL.
