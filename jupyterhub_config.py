@@ -10,7 +10,8 @@ c.JupyterHub.services = [
     }
 ]
 
-c.JupyterHub.spawner_class = 'dockerspawner.SystemUserSpawner'
+# c.JupyterHub.spawner_class = 'dockerspawner.SystemUserSpawner'
+c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
 c.DockerSpawner.remove_containers = True
 c.DockerSpawner.image_whitelist = {
     'base': 'jupyter/base-notebook',
