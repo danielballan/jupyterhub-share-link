@@ -33,6 +33,8 @@ c.DockerSpawner.image_whitelist = {
 c.JupyterHub.allow_named_servers = True
 c.DockerSpawner.name_template = "{prefix}-{username}-{servername}"
 
+c.Spawner.default_url = '/lab'
+
 # The docker instances need access to the Hub,
 # so the default loopback port doesn't work:
 from jupyter_client.localinterfaces import public_ips
