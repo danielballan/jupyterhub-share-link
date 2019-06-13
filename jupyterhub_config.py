@@ -6,7 +6,7 @@ c.JupyterHub.services = [
         'name': 'share-link',
         'admin': True,
         'url': 'http://127.0.0.1:21211',
-        'command': [sys.executable, '-m', 'jupyterhub_link_sharing.run'],
+        'command': [sys.executable, '-m', 'jupyterhub_share_link.run'],
     }
 ]
 
