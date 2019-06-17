@@ -27,18 +27,38 @@ availability of a specific image.
 ## Try it
 
 1. Start JupyterHub using the configuration in this repo.
-2. Log in with any username and password---for example, ``alice``.
+
+    ```
+    git clone https://github.com/danielballan/jupyterhub-share-link
+    cd jupyterhub-share-link
+    pip install -r requirements.txt
+    ```
+2. Generate a key pair that will be used to sign and verify share links.
+
+    ```
+    # creates private.pem and public.pem in the current directory
+    python -m jupyterhub_share_link.generate_keys
+    ```
+3. Start JupyterHub using the example configuration in this repo.
+
+    ```
+    jupyterhub  # uses jupyterhub_config.py in current directory
+    ```
+
+4. Log in with any username and password---for example, ``alice``.
    (The ``DummyAuthenticator`` is used by this demo configuration.)
-3. Spawn a server using the ``base`` image.
-4. Create and save a notebook ``Untitled.ipynb`` to share.
-5. ``GET`` the following URL:
+
+5. Spawn a server using the ``base`` image.
+
+6. Create and save a notebook ``Untitled.ipynb`` to share.
+
+7. ``GET`` the following URL:
 
    ```
    /services/share-link/create/alice/base/Untitled.ipynb
    ```
 
    generically:
-
 
    ```
    /services/share-link/create/<username>/<image-spec>/<path/to/file>
@@ -49,8 +69,10 @@ availability of a specific image.
    should should specify time as UNIX Epoch UTC.
 
    This returns a shareable link that will be valid for one hour.
-6. Log in as a different user and enter the shared link.
-6. The user will have a new server started running the same image as ``alice``,
+
+8. Log in as a different user and enter the shared link.
+
+9. The user will have a new server started running the same image as ``alice``,
    and the notebook will be copied and opened.
 
 ## Design
