@@ -48,20 +48,22 @@ availability of a specific image.
 4. Log in with any username and password---for example, ``alice``.
    (The ``DummyAuthenticator`` is used by this demo configuration.)
 
-5. Spawn a server using the ``base`` image.
+5. Spawn a server using the default image,
+   ``danielballan/base-notebook-with-image-spec-extension``.
 
 6. Create and save a notebook ``Untitled.ipynb`` to share.
 
-7. ``GET`` the following URL:
+7. Eventually we want a "Share" command in the UI to generate a shareable link.
+   For now, ``GET`` the following URL:
 
    ```
-   /services/share-link/create/alice/base/Untitled.ipynb
+   /services/share-link/create/alice/danielballan%2Fbase-notebook-with-image-spec-extension/Untitled.ipynb
    ```
 
    generically:
 
    ```
-   /services/share-link/create/<username>/<image-spec>/<path/to/file>
+   /services/share-link/create/<username>/<urlencoded-image-spec>/<path/to/file>
    ```
 
    It also accepts an optional ``expiration_time`` query parameter, which

@@ -28,12 +28,11 @@ class Launcher():
     hub_url = "127.0.0.1:8000/"
 
     def __init__(self, user, auth):
-        print('TOKEN?', auth)
         self.hub_api_token = auth
         self.user = user
 
-    def log(self, *args):
-        print("***LOG MSG***:", args)
+    def log(self, *args, **kwargs):
+        app_log(*args, **kwargs)
 
     async def api_request(self, url, *args, **kwargs):
         """Make an API request to JupyterHub"""

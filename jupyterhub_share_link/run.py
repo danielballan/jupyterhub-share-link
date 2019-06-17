@@ -39,8 +39,10 @@ class CreateSharedLink(HubAuthenticated, RequestHandler):
         now = datetime.utcnow()
         default_expiration_time = now + timedelta(hours=1)
         expiration_time = datetime.fromtimestamp(
-            float(self.get_argument('expiration_time', default_expiration_time.timestamp())))
-        # Enforce a max of two days. This is not for long-term sharing, galleries, etc.
+            float(self.get_argument('expiration_time',
+                                    default_expiration_time.timestamp())))
+        # Enforce a max of two days.
+        # This is not for long-term sharing, galleries, etc.
         max_time = now + timedelta(days=2)
         if expiration_time > max_time:
             raise HTTPError(
@@ -88,38 +90,57 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
         dest_path = self.get_argument('dest_path',
                                       os.path.basename(source_path))
 
-        launcher = Launcher(self.get_current_user(), self.hub_auth.api_token)
-
-        # Ensure destination has a server to share into.
-        dest_server_name = f'shared-link-{str(uuid.uuid4())[:8]}'
-        # TODO Use existing server with this image if it exists.
-        result = await launcher.launch(image, dest_server_name)
-
-        if result['status'] == 'pending':
-            redirect_url = f"{result['url']}?next={urlquote(self.request.full_url())}"
-            # Redirect to progress bar, and then back here to try again.
-            self.redirect(redirect_url)
-        assert result['status'] == 'running'
-
-        resp = await launcher.api_request(
-            url_path_join('users', source_username),
-            method='GET',
-        )
-        source_user_data = json.loads(resp.body.decode('utf-8'))
-        print(source_user_data['servers'])
-        print(source_user_data['server'])
-        source_server_url = source_user_data['servers'][source_server_name]['url']
+        current_user = self.get_current_user()
+        launcher = Launcher(current_user, self.hub_auth.api_token)
 
         # HACK
         # The Jupyter Hub API only gives us a *relative* path to the user
         # servers. Use self.request to get at the public proxy URL.
         base_url = f'{self.request.protocol}://{self.request.host}'
+        headers = {'Authorization': f'token {launcher.hub_api_token}'}
 
+        # Ensure destination has a server to share into.
+        # First check to see if any of the currently-running servers have the
+        # same container image as the one we need.
+        resp = await launcher.api_request(
+            url_path_join('users', current_user['name']),
+            method='GET',
+        )
+        dest_user_data = json.loads(resp.body.decode('utf-8'))
+        for server in (dest_user_data['servers'] or {}).values():
+            image_spec_url = url_path_join(base_url,
+                                           server['url'],
+                                           'image-spec')
+            req = HTTPRequest(image_spec_url, headers=headers)
+            resp = await AsyncHTTPClient().fetch(req)
+            this_image = json.loads(resp.body.decode('utf-8')).get('JUPYTER_IMAGE_SPEC')
+            if this_image == image:
+                dest_server_name = server['name']
+                result = server
+                break
+        else:
+            # No currently-running server has the container image we need.
+            # Start a new server with a random name.
+            dest_server_name = f'shared-link-{str(uuid.uuid4())[:8]}'
+            result = await launcher.launch(image, dest_server_name)
+
+            if result['status'] == 'pending':
+                redirect_url = f"{result['url']}?next={urlquote(self.request.full_url())}"
+                # Redirect to progress bar, and then back here to try again.
+                self.redirect(redirect_url)
+            assert result['status'] == 'running'
+
+        # Fetch the content we want to copy.
+        resp = await launcher.api_request(
+            url_path_join('users', source_username),
+            method='GET',
+        )
+        source_user_data = json.loads(resp.body.decode('utf-8'))
+        source_server_url = source_user_data['servers'][source_server_name]['url']
         content_url = url_path_join(base_url,
                                     source_server_url,
                                     'api/contents',
                                     source_path)
-        print('content_url', content_url)
         headers = {'Authorization': f'token {launcher.hub_api_token}'}
         req = HTTPRequest(content_url, headers=headers)
         resp = await AsyncHTTPClient().fetch(req)
