@@ -83,7 +83,7 @@ This involves:
 
   ```
   POST /create
-  POST /open
+  GET /open
   ```
 * A public/private key pair that belong to the service, enabling to verify that
   shared links are valid.
@@ -92,6 +92,9 @@ This involves:
   https://github.com/danielballan/jupyter-expose-image-spec
 * A labextension that adds button to the notebook toolbar.
   https://github.com/danielballan/jupyterhub-share-link-labextension
+
+The file-copying occurs via the notebook's ContentsManager, so there is no need
+for users to be on the same filesystem. They only have to be on the same Hub.
 
 ## Open Questions
 
