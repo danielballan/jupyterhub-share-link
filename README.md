@@ -5,9 +5,15 @@ use it in production yet. Contributors welcome!
 
 ## Demo
 
-In this GIF, Alice logs in, open a notebook, and creates a shareable link. Then,
-on the right, Bob logs in and pastes the link into his browser. He obtains a
-copy of Alice's notebook.
+In this GIF, Alice logs in, open a notebook, and clicks a button to create a
+shareable link. A dialog box appears, saying:
+
+> For the next hour, any other user on this JupyterHub who has this link will be
+> able to fetch a copy of your latest saved version of
+> dask-examples/array.ipynb.
+
+She copies the link and gives it to Bob. Then, on the right, Bob logs in and
+pastes the link into his browser. He is given a copy of Alice's notebook.
 
 ![Demo](https://github.com/danielballan/jupyterhub-share-link/blob/master/demo.gif?raw=true)
 
