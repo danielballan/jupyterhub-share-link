@@ -3,6 +3,14 @@
 This is a new project that is still a work in progress. Please do not attempt to
 use it in production yet. Contributors welcome!
 
+## Demo
+
+In this GIF, Alice logs in, open a notebook, and creates a shareable link. Then,
+on the right, Bob logs in and pastes the link into his browser. He obtains a
+copy of Alice's notebook.
+
+![Demo](https://github.com/danielballan/jupyterhub-share-link/blob/master/demo.gif?raw=true)
+
 ## Uses and Limitations
 
 This is for low-effort, short-term sharing between users who are on the same
