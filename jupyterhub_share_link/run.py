@@ -32,15 +32,15 @@ public_key = pathlib.Path("public.pem").read_text()
 
 class CreateSharedLink(HubAuthenticated, RequestHandler):
     @authenticated
-    async def get(self, user, image, path):
-        server_name = self.get_argument('server_name', '')
+    async def post(self):
+        data = json.loads(self.request.body.decode('utf-8'))
 
-        # Default to one hour lifetime.
         now = datetime.utcnow()
-        default_expiration_time = now + timedelta(hours=1)
-        expiration_time = datetime.fromtimestamp(
-            float(self.get_argument('expiration_time',
-                                    default_expiration_time.timestamp())))
+        if data.get('expiration_time') is not None:
+            expiration_time = datetime.fromtimestamp(data['expiration_time'])
+        else:
+            # Default to one hour lifetime.
+            expiration_time = now + timedelta(hours=1)
         # Enforce a max of two days.
         # This is not for long-term sharing, galleries, etc.
         max_time = now + timedelta(days=2)
@@ -51,10 +51,10 @@ class CreateSharedLink(HubAuthenticated, RequestHandler):
             )
 
         payload = {
-            'user': user,
-            'image': image,
-            'path': path,
-            'server_name': server_name,
+            'user': self.get_current_user()['name'],
+            'image': data['image'],
+            'path': data['path'],
+            'server_name': data.get('server_name', ''),
             'exp': expiration_time
         }
         token = jwt.encode(payload, private_key, algorithm="RS256")
@@ -157,7 +157,7 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
         req = HTTPRequest(dest_url, "PUT", headers=headers, body=content)
         resp = await AsyncHTTPClient().fetch(req)
 
-        redirect_url = f"{result['url']}/tree/{dest_path}"
+        redirect_url = url_path_join(result['url'], 'lab', 'tree', dest_path)
 
         # necessary?
         redirect_url = redirect_url if redirect_url.startswith('/') else '/' + redirect_url
@@ -168,7 +168,7 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
 def main():
     app = Application(
         [
-            (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'create/([^/]*)/([^/]*)/(.*)/?', CreateSharedLink),
+            (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'create/?', CreateSharedLink),
             (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'open/?', OpenSharedLink)
         ]
     )

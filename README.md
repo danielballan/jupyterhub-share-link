@@ -5,19 +5,22 @@ use it in production yet. Contributors welcome!
 
 ## Uses and Limitations
 
-Produce a "share link" for a notebook (or any file) and give it to other users
-on your Hub. When another user clicks the share link, the current version of
-the file is copied from your notebook server to theirs. If you change the file,
-the recipient can click the link again to make another copy reflecting the
-changes. After a given time interval, the link expires.
+This is for low-effort, short-term sharing between users who are on the same
+Hub.
 
-This is for low-effort, short-term sharing between users who are on the same Hub
-using a container-based spawner. The share link encodes both the notebook and
-the *container image* that the sender was running that notebook in. The
-recipient will automatically be directed to a server running that same container
-image, and thus have some assurance that they will be running the notebook in a
-compatible software environment. (This is not the case when sharing notebooks
-via email or Dropbox.)
+The sender click a button to create a "share link" for a notebook and then gives
+that link to any other user on the same Hub. When another user clicks the share
+link, the last saved version of the file is copied from the sender's notebook server to
+the recipient's. If the sender changes the file, the recipient can click the
+link again to make another copy reflecting the changes. After a given time
+interval, the link expires.
+
+On Hubs using a container-based spawner, the share link encodes both the
+notebook and the *container image* that the sender was running that notebook in.
+The recipient will automatically be directed to a server running that same
+container image, and thus have some assurance that they will be running the
+notebook in a compatible software environment. (This is not the case when
+sharing notebooks via email or Dropbox.)
 
 This approach is not suitable for persistent sharing, such as galleries or lists
 of links to be maintained long term. For those use cases, it is better to encode
@@ -26,7 +29,10 @@ availability of a specific image.
 
 ## Try it
 
-1. Start JupyterHub using the configuration in this repo.
+This demonstrates sharing with a container-based spawner, but this can also be
+used with a simple local process spawner or any other spawner.
+
+1. Clone this repository and install its requirements.
 
     ```
     git clone https://github.com/danielballan/jupyterhub-share-link
@@ -53,26 +59,10 @@ availability of a specific image.
 
 6. Create and save a notebook ``Untitled.ipynb`` to share.
 
-7. Eventually we want a "Share" command in the UI to generate a shareable link.
-   For now, ``GET`` the following URL:
+7. Click the share button, the paper airplane icon on the left side of the
+   notebook toolbar. Click the button to copy the link.
 
-   ```
-   /services/share-link/create/alice/danielballan%2Fbase-notebook-with-image-spec-extension/Untitled.ipynb
-   ```
-
-   generically:
-
-   ```
-   /services/share-link/create/<username>/<urlencoded-image-spec>/<path/to/file>
-   ```
-
-   It also accepts an optional ``expiration_time`` query parameter, which
-   defaults to one hour from the current time and may not exceed two days. It
-   should should specify time as UNIX Epoch UTC.
-
-   This returns a shareable link that will be valid for one hour.
-
-8. Log in as a different user and enter the shared link.
+8. Log in as a different user and paste the shared link.
 
 9. The user will have a new server started running the same image as ``alice``,
    and the notebook will be copied and opened.
@@ -81,17 +71,19 @@ availability of a specific image.
 
 This involves:
 
-* A stateless Hub Service (this repo)
+* A stateless Hub Service (this repo) with the routes:
+
+  ```
+  POST /create
+  POST /open
+  ```
 * A public/private key pair that belong to the service, enabling to verify that
   shared links are valid.
 * A small notebook server extension for exposing ``JUPYTER_IMAGE_SPEC``, an
   environment variable in a new server REST endpoint.
   https://github.com/danielballan/jupyter-expose-image-spec
-
-## TODO
-
-* Reuse an existing server for the destination if it has the right "profile" /
-  image.
+* A labextension that adds button to the notebook toolbar.
+  https://github.com/danielballan/jupyterhub-share-link-labextension
 
 ## Open Questions
 

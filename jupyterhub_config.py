@@ -13,6 +13,10 @@ c.JupyterHub.services = [
     }
 ]
 
+c.JupyterHub.allow_named_servers = True
+c.Spawner.cmd = ['jupyter-labhub']
+
+c.JupyterHub.authenticator_class = 'jupyterhub.auth.DummyAuthenticator'
 
 class PatchedDockerSpawner(dockerspawner.DockerSpawner):
     # We need the server to know what image it is using.
@@ -27,14 +31,13 @@ class PatchedDockerSpawner(dockerspawner.DockerSpawner):
         return env
 
 
-c.JupyterHub.spawner_class = PatchedDockerSpawner
-c.DockerSpawner.remove_containers = True
-c.DockerSpawner.image_whitelist = [
-    'danielballan/base-notebook-with-image-spec-extension',
-    'danielballan/scipy-notebook-with-image-spec-extension',
-]
-c.JupyterHub.allow_named_servers = True
-c.DockerSpawner.name_template = "{prefix}-{username}-{servername}"
+# c.JupyterHub.spawner_class = PatchedDockerSpawner
+# c.DockerSpawner.remove_containers = True
+# c.DockerSpawner.image_whitelist = [
+#     'danielballan/base-notebook-with-image-spec-extension',
+#     'danielballan/scipy-notebook-with-image-spec-extension',
+# ]
+# c.DockerSpawner.name_template = "{prefix}-{username}-{servername}"
 
 c.Spawner.default_url = '/lab'
 
@@ -43,7 +46,6 @@ c.Spawner.default_url = '/lab'
 from jupyter_client.localinterfaces import public_ips
 c.JupyterHub.hub_ip = public_ips()[0]
 
-c.JupyterHub.authenticator_class = 'jupyterhub.auth.DummyAuthenticator'
 
 # HACK? Workaround. See jupyterhub.handlers.base "don't own".
 c.JupyterHub.admin_access = True
