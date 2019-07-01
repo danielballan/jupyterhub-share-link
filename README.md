@@ -152,17 +152,18 @@ in a server running the same container image as that which it was shared from.
 
 This involves:
 
-* A stateless Hub Service with the routes:
+* A stateless Hub Service (in this repository) with the routes:
 
   ```
   POST /create
   GET /open
   ```
-* A public/private key pair that belong to the service, enabling to verify that
-  shared links are valid.
+* A public/private key pair that belong to the service, enabling it issue
+  "share" links that it can verify the recipient has not tampered with.
 * A small notebook server extension for exposing ``JUPYTER_IMAGE_SPEC``, an
-  environment variable in a new server REST endpoint.
-* A labextension that adds button to the notebook toolbar.
+  environment variable in a new server REST endpoint, and a labextension that
+  adds button to the notebook toolbar. These are kept in
+  [danielballan/jupyterhub-share-link-labextension](https://github.com/danielballan/jupyterhub-share-link-labextension).
 
 The file-copying occurs via the notebook's ContentsManager, so there is no need
 for users to be on the same filesystem. They only have to be on the same Hub.
