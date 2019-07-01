@@ -1,7 +1,11 @@
-import os
+from jupyter_client.localinterfaces import public_ips
+from traitlets.config import get_config
 import sys
 
 import dockerspawner
+
+
+c = get_config()
 
 
 c.JupyterHub.services = [
@@ -17,6 +21,7 @@ c.JupyterHub.allow_named_servers = True
 c.Spawner.cmd = ['jupyter-labhub']
 
 c.JupyterHub.authenticator_class = 'jupyterhub.auth.DummyAuthenticator'
+
 
 class PatchedDockerSpawner(dockerspawner.DockerSpawner):
     # We need the server to know what image it is using.
@@ -43,7 +48,6 @@ c.Spawner.default_url = '/lab'
 
 # The docker instances need access to the Hub,
 # so the default loopback port doesn't work:
-from jupyter_client.localinterfaces import public_ips
 c.JupyterHub.hub_ip = public_ips()[0]
 
 

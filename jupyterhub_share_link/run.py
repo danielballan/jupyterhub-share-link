@@ -3,7 +3,6 @@ This serves `/services/whoami/`, authenticated with the Hub, showing the user th
 """
 import base64
 from datetime import datetime, timedelta
-from getpass import getuser
 import json
 import os
 import pathlib
@@ -18,7 +17,6 @@ from tornado.ioloop import IOLoop
 from tornado.web import Application
 from tornado.web import authenticated
 from tornado.web import RequestHandler
-from tornado.web import HTTPError
 from urllib.parse import urlparse, quote as urlquote
 
 from .launcher import Launcher

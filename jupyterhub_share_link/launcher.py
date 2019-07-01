@@ -7,18 +7,12 @@ needed by this hub service.
 """
 import base64
 import json
-import random
-import re
-import string
-from urllib.parse import urlparse
 import uuid
 import os
 
 from tornado.log import app_log
 from tornado import web, gen
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
-from traitlets.config import LoggingConfigurable
-from traitlets import Integer, Unicode, Bool
 
 
 class Launcher():
