@@ -86,7 +86,8 @@ class Launcher():
         # data to be passed into spawner's user_options during launch
         # and also to be returned into 'ready' state
         data = {'image': image,
-                'token': base64.urlsafe_b64encode(uuid.uuid4().bytes).decode('ascii').rstrip('=\n')}
+                'token': base64.urlsafe_b64encode(
+                    uuid.uuid4().bytes).decode('ascii').rstrip('=\n')}
 
         # # test if exists and early exit if so
         user_data = await self.get_user_data()
@@ -96,7 +97,8 @@ class Launcher():
             return {'status': 'running', 'url': redirect_url}
 
         # start server
-        app_log.info("Starting server %s for user %s with image %s", server_name, username, image)
+        app_log.info("Starting server %s for user %s with image %s",
+                     server_name, username, image)
         try:
             resp = await self.api_request(
                 'users/{}/servers/{}'.format(username, server_name),
@@ -110,25 +112,30 @@ class Launcher():
                 # NOTE: This ends up being about ten minutes
                 for i in range(64):
                     user_data = await self.get_user_data()
-                    print('***Started... userdata:***:', user_data['servers'][server_name])
 
-                    if user_data['servers'][server_name]['ready']:
+                    server = user_data['servers'][server_name]
+                    if server['ready']:
                         # exit, server running
-                        return {'status': 'running', 'url': user_data['servers'][server_name]['url']}
+                        return {'status': 'running',
+                                'url': server['url']}
 
-                    if user_data['servers'][server_name]['progress_url']:
+                    if server['progress_url']:
                         # exit, server pending with progress url
-                        return {'url': user_data['servers'][server_name]['progress_url'],
+                        return {'url': server['progress_url'],
                                 'status': 'pending'}
 
-                    if not user_data['servers'][server_name]['pending']:
-                        raise web.HTTPError(500, "Image %s for user %s failed to launch" % (image, username))
+                    if not server['pending']:
+                        raise web.HTTPError(
+                            500, ("Image %s for user %s failed to launch"
+                                  % (image, username)))
                     # FIXME: make this configurable
                     # FIXME: Measure how long it takes for servers to start
                     # and tune this appropriately
                     await gen.sleep(min(1.4 ** i, 10))
                 else:
-                    raise web.HTTPError(500, "Image %s for user %s took too long to launch" % (image, username))
+                    raise web.HTTPError(
+                        500, ("Image %s for user %s took too long to launch"
+                              % (image, username)))
 
         except HTTPError as e:
             if e.response:

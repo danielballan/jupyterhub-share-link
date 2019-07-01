@@ -1,6 +1,3 @@
-"""An example service authenticating with the Hub.
-This serves `/services/whoami/`, authenticated with the Hub, showing the user their own info.
-"""
 import base64
 from datetime import datetime, timedelta
 import json
@@ -123,7 +120,8 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
             result = await launcher.launch(image, dest_server_name)
 
             if result['status'] == 'pending':
-                redirect_url = f"{result['url']}?next={urlquote(self.request.full_url())}"
+                redirect_url = (f"{result['url']}"
+                                f"?next={urlquote(self.request.full_url())}")
                 # Redirect to progress bar, and then back here to try again.
                 self.redirect(redirect_url)
             assert result['status'] == 'running'
@@ -158,7 +156,8 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
         redirect_url = url_path_join(result['url'], 'lab', 'tree', dest_path)
 
         # necessary?
-        redirect_url = redirect_url if redirect_url.startswith('/') else '/' + redirect_url
+        redirect_url = (redirect_url if redirect_url.startswith('/')
+                        else '/' + redirect_url)
 
         self.redirect(redirect_url)
 

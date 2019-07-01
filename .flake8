@@ -2,4 +2,4 @@
 max-line-length = 80
 ignore = E501
 exclude = .git,__pycache__,build,dist,versioneer.py,jupyterhub_share_link/_version.py,docs/source/conf.py
-select = C,E,F,W,B,B901
+select = C,E,F,W,B,B901,B950
