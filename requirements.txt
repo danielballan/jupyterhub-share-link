@@ -1,5 +1,4 @@
 cryptography
-dockerspawner
 jupyterhub
 pyjwt
 tornado
