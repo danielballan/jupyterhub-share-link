@@ -117,7 +117,13 @@ in a server running the same container image as that which it was shared from.
     git clone https://github.com/danielballan/jupyterhub-share-link-labextension
     ```
 
-4. Install the labextension and the server extension into the user environment.
+4. Install JupyterLab in the user environment.
+
+   ```
+   pip install jupyterlab
+   ```
+
+5. Install the labextension and the server extension into the user environment.
 
     ```
     jupyter labextension install jupyterhub-share-link-labextension
@@ -125,22 +131,22 @@ in a server running the same container image as that which it was shared from.
     jupyter serverextension enable --py jupyterhub_share_link_serverextension --sys-prefix
     ```
 
-5. Start JupyterHub using an example configuration provided in this repo.
+6. Start JupyterHub using an example configuration provided in this repo.
 
     ```
     jupyterhub -f example_config_no_containers.py
     ```
 
-6. Log in as a sytem user and start the user's server.
+7. Log in as a sytem user and start the user's server.
 
-7. Create and save a notebook ``Untitled.ipynb`` to share.
+8. Create and save a notebook ``Untitled.ipynb`` to share.
 
-8. Click the share button, the paper airplane icon on the left side of the
+9. Click the share button, the paper airplane icon on the left side of the
    notebook toolbar. Click the button to copy the link.
 
-9. Log in as a different user and paste the shared link.
+10. Log in as a different user and paste the shared link.
 
-10. The notebook will be copied to that user's server and opened.
+11. The notebook will be copied to that user's server and opened.
 
 ## Design
 

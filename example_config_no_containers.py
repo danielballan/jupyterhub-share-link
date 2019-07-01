@@ -8,12 +8,12 @@ c.JupyterHub.services = [
         'name': 'share-link',
         'admin': True,
         'url': 'http://127.0.0.1:21211',
-        'command': [sys.executable, '-m', 'jupyterhub_share_link.run', 'asdfasdfasd'],
+        'command': [sys.executable, '-m', 'jupyterhub_share_link.run'],
     }
 ]
 
 c.JupyterHub.allow_named_servers = True
-c.Spawner.cmd = ['jupyter-labhub']
+# c.Spawner.cmd = ['jupyter-labhub']
 
 c.JupyterHub.authenticator_class = 'jupyterhub.auth.DummyAuthenticator'
 
