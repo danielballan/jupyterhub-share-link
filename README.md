@@ -43,8 +43,11 @@ availability of a specific image.
 
 ## Try it
 
-This demonstrates sharing with a container-based spawner, but this can also be
-used with a simple local process spawner or any other spawner.
+This works with both local process spawners and container-based spawners. If
+contaienrs are used, the service will ensure that the shared notebook is opened
+in a server running the same container image as that which it was shared from.
+
+### With Containers
 
 1. Clone this repository and install it.
 
@@ -52,41 +55,98 @@ used with a simple local process spawner or any other spawner.
     git clone https://github.com/danielballan/jupyterhub-share-link
     cd jupyterhub-share-link
     pip install .
-    pip install dockerspawner  # optional; this also works without containers
     ```
+
+2. Install [DockerSpawner](https://github.com/jupyterhub/dockerspawner).
+
+    ```
+    pip install dockerspawner
+    ```
+
+3. Generate a key pair that will be used to sign and verify share links.
+
+    ```
+    # creates private.pem and public.pem in the current directory
+    python -m jupyterhub_share_link.generate_keys
+    ```
+
+4. Start JupyterHub using an example configuration provided in this repo.
+
+    ```
+    jupyterhub -f example_config_dockerspawner.py
+    ```
+
+5. Log in with any username and password---for example, ``alice``.
+   (The ``DummyAuthenticator`` is used by this demo configuration.)
+
+6. Spawn a server using the default image,
+   ``danielballan/base-notebook-with-image-spec-extension``.
+
+7. Create and save a notebook ``Untitled.ipynb`` to share.
+
+8. Click the share button, the paper airplane icon on the left side of the
+   notebook toolbar. Click the button to copy the link.
+
+9. Log in as a different user and paste the shared link.
+
+10. The user will have a new server started running the same image as ``alice``,
+    and the notebook will be copied and opened.
+
+### Without Containers
+
+1. Clone this repository and install it.
+
+    ```
+    git clone https://github.com/danielballan/jupyterhub-share-link
+    cd jupyterhub-share-link
+    pip install .
+    ```
+
 2. Generate a key pair that will be used to sign and verify share links.
 
     ```
     # creates private.pem and public.pem in the current directory
     python -m jupyterhub_share_link.generate_keys
     ```
-3. Start JupyterHub using the example configuration in this repo.
+
+3. Clone [jupyter-share-link-labextension](https://github.com/danielballan/jupyterhub-share-link-labextension)
+   which includes a JupyterLab extension for the front-end and a Jupyter server
+   extension for the back-end.
 
     ```
-    jupyterhub  # uses jupyterhub_config.py in current directory
+    git clone https://github.com/danielballan/jupyterhub-share-link-labextension
     ```
 
-4. Log in with any username and password---for example, ``alice``.
-   (The ``DummyAuthenticator`` is used by this demo configuration.)
+4. Install the labextension and the server extension into the user environment.
 
-5. Spawn a server using the default image,
-   ``danielballan/base-notebook-with-image-spec-extension``.
+    ```
+    jupyter labextension install jupyterhub-share-link-labextension
+    pip install jupyterhub-share-link-labextension/
+    jupyter serverextension enable --py jupyterhub_share_link_serverextension --sys-prefix
+    ```
 
-6. Create and save a notebook ``Untitled.ipynb`` to share.
+5. Start JupyterHub using an example configuration provided in this repo.
 
-7. Click the share button, the paper airplane icon on the left side of the
+    ```
+    jupyterhub -f example_config_no_containers.py
+    ```
+
+6. Log in as a sytem user and start the user's server.
+
+7. Create and save a notebook ``Untitled.ipynb`` to share.
+
+8. Click the share button, the paper airplane icon on the left side of the
    notebook toolbar. Click the button to copy the link.
 
-8. Log in as a different user and paste the shared link.
+9. Log in as a different user and paste the shared link.
 
-9. The user will have a new server started running the same image as ``alice``,
-   and the notebook will be copied and opened.
+10. The notebook will be copied to that user's server and opened.
 
 ## Design
 
 This involves:
 
-* A stateless Hub Service (this repo) with the routes:
+* A stateless Hub Service with the routes:
 
   ```
   POST /create
@@ -96,9 +156,7 @@ This involves:
   shared links are valid.
 * A small notebook server extension for exposing ``JUPYTER_IMAGE_SPEC``, an
   environment variable in a new server REST endpoint.
-  https://github.com/danielballan/jupyter-expose-image-spec
 * A labextension that adds button to the notebook toolbar.
-  https://github.com/danielballan/jupyterhub-share-link-labextension
 
 The file-copying occurs via the notebook's ContentsManager, so there is no need
 for users to be on the same filesystem. They only have to be on the same Hub.

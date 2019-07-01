@@ -21,8 +21,10 @@ from .launcher import Launcher
 
 HubAuthenticated.hub_auth
 
-private_key = pathlib.Path("private.pem").read_text()
-public_key = pathlib.Path("public.pem").read_text()
+private_key_path = os.getenv('JUPYTERHUB_SHARE_LINK_PRIVATE_KEY', "private.pem")
+private_key = pathlib.Path(private_key_path).read_text()
+public_key_path = os.getenv('JUPYTERHUB_SHARE_LINK_PUBLIC_KEY', "public.pem")
+public_key = pathlib.Path(public_key_path).read_text()
 
 
 class CreateSharedLink(HubAuthenticated, RequestHandler):

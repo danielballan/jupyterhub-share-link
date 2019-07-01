@@ -80,8 +80,9 @@ target/
 .ipynb_checkpoints
 
 # pem files might be created during testing
-.pem
+*.pem
 
 # In case of trying in place, jupyterhub files might be created.
 jupyterhub.sqlite
 jupyterhub_cookie_secret
+jupyterhub-proxy.pid

@@ -36,8 +36,8 @@ class PatchedDockerSpawner(dockerspawner.DockerSpawner):
 c.JupyterHub.spawner_class = PatchedDockerSpawner
 c.DockerSpawner.remove_containers = True
 c.DockerSpawner.image_whitelist = [
-    'danielballan/base-notebook-with-image-spec-extension',
-    'danielballan/scipy-notebook-with-image-spec-extension',
+    'danielballan/base-notebook-with-jupyterhub-share-labextension',
+    'danielballan/scipy-notebook-with-jupyterhub-share-labextension',
 ]
 c.DockerSpawner.name_template = "{prefix}-{username}-{servername}"
 
