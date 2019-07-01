@@ -13,6 +13,7 @@ c.JupyterHub.services = [
         'command': [sys.executable, '-m', 'jupyterhub_share_link.run'],
     }
 ]
+c.JupyterHub.admin_access = True  # Service needs to access user servers.
 
 c.JupyterHub.allow_named_servers = True
 c.Spawner.cmd = ['jupyter-labhub']
@@ -46,7 +47,3 @@ c.Spawner.default_url = '/lab'
 # The docker instances need access to the Hub,
 # so the default loopback port doesn't work:
 c.JupyterHub.hub_ip = public_ips()[0]
-
-
-# HACK? Workaround. See jupyterhub.handlers.base "don't own".
-c.JupyterHub.admin_access = True
