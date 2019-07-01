@@ -46,12 +46,13 @@ availability of a specific image.
 This demonstrates sharing with a container-based spawner, but this can also be
 used with a simple local process spawner or any other spawner.
 
-1. Clone this repository and install its requirements.
+1. Clone this repository and install it.
 
     ```
     git clone https://github.com/danielballan/jupyterhub-share-link
     cd jupyterhub-share-link
-    pip install -r requirements.txt
+    pip install .
+    pip install dockerspawner  # optional; this also works without containers
     ```
 2. Generate a key pair that will be used to sign and verify share links.
 

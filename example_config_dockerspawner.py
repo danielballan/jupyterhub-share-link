@@ -1,13 +1,10 @@
+import dockerspawner
 from jupyter_client.localinterfaces import public_ips
 from traitlets.config import get_config
 import sys
 
-import dockerspawner
-
 
 c = get_config()
-
-
 c.JupyterHub.services = [
     {
         'name': 'share-link',
@@ -36,13 +33,13 @@ class PatchedDockerSpawner(dockerspawner.DockerSpawner):
         return env
 
 
-# c.JupyterHub.spawner_class = PatchedDockerSpawner
-# c.DockerSpawner.remove_containers = True
-# c.DockerSpawner.image_whitelist = [
-#     'danielballan/base-notebook-with-image-spec-extension',
-#     'danielballan/scipy-notebook-with-image-spec-extension',
-# ]
-# c.DockerSpawner.name_template = "{prefix}-{username}-{servername}"
+c.JupyterHub.spawner_class = PatchedDockerSpawner
+c.DockerSpawner.remove_containers = True
+c.DockerSpawner.image_whitelist = [
+    'danielballan/base-notebook-with-image-spec-extension',
+    'danielballan/scipy-notebook-with-image-spec-extension',
+]
+c.DockerSpawner.name_template = "{prefix}-{username}-{servername}"
 
 c.Spawner.default_url = '/lab'
 
