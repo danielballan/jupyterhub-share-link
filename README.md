@@ -41,7 +41,7 @@ of links to be maintained long term. For those use cases, it is better to encode
 software dependencies (as in a Binder repo) rather than relying on the
 availability of a specific image.
 
-## Try it
+## Try it &mdash; with containers or without containers
 
 This works with both local process spawners and container-based spawners. If
 contaienrs are used, the service will ensure that the shared notebook is opened
