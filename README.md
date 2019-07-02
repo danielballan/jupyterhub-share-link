@@ -120,12 +120,14 @@ in a server running the same container image as that which it was shared from.
 4. Install the labextension and the server extension into the user environment.
 
     ```
-    jupyter labextension install jupyterhub-share-link-labextension
     pip install jupyterhub-share-link-labextension/
+    jupyter labextension install jupyterhub-share-link-labextension/
     jupyter serverextension enable --py jupyterhub_share_link_serverextension --sys-prefix
     ```
 
-5. Start JupyterHub using an example configuration provided in this repo.
+5. Start JupyterHub using an example configuration provided in this repo. (In
+   order to be able to log in as multiple users, you will likely need to run
+   this as root.)
 
     ```
     jupyterhub -f example_config_no_containers.py
