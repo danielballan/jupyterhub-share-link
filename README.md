@@ -5,8 +5,8 @@ use it in production yet. Contributors welcome!
 
 ## Demo
 
-In this GIF, Alice logs in, open a notebook, and clicks a button to create a
-shareable link. A dialog box appears, saying:
+In this GIF, Alice logs in, right-clicks a notebook and chooses "Copy Shareable
+Link". A dialog box appears, saying:
 
 > For the next hour, any other user on this JupyterHub who has this link will be
 > able to fetch a copy of your latest saved version of
@@ -22,12 +22,12 @@ pastes the link into his browser. He is given a copy of Alice's notebook.
 This is for low-effort, short-term sharing between users who are on the same
 Hub.
 
-The sender click a button to create a "share link" for a notebook and then gives
-that link to any other user on the same Hub. When another user clicks the share
-link, the last saved version of the file is copied from the sender's notebook server to
-the recipient's. If the sender changes the file, the recipient can click the
-link again to make another copy reflecting the changes. After a given time
-interval, the link expires.
+The sender right-clicks a notebook (or any file) and clicks "Copy Shareable
+Link." The sender gives that link to any other user on the same Hub. When
+another user clicks the share link, the last saved version of the file is copied
+from the sender's notebook server to the recipient's. If the sender changes the
+file, the recipient can click the link again to make another copy reflecting the
+changes. After a given time interval, the link expires.
 
 On Hubs using a container-based spawner, the share link encodes both the
 notebook and the *container image* that the sender was running that notebook in.
@@ -84,8 +84,8 @@ in a server running the same container image as that which it was shared from.
 
 7. Create and save a notebook ``Untitled.ipynb`` to share.
 
-8. Click the share button, the paper airplane icon on the left side of the
-   notebook toolbar. Click the button to copy the link.
+8. Find ``Untitled.ipynb`` in the file browser and right-click it.
+   A dialog box will appear. Click the button to copy the link.
 
 9. Log in as a different user and paste the shared link.
 
@@ -129,8 +129,8 @@ in a server running the same container image as that which it was shared from.
 
 6. Create and save a notebook ``Untitled.ipynb`` to share.
 
-7. Click the share button, the paper airplane icon on the left side of the
-   notebook toolbar. Click the button to copy the link.
+7. Find ``Untitled.ipynb`` in the file browser and right-click it.
+   A dialog box will appear. Click the button to copy the link.
 
 8. Log in as a different user and paste the shared link.
 
