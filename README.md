@@ -112,6 +112,8 @@ in a server running the same container image as that which it was shared from.
 3. Install the labextension and the server extension into the user environment.
 
     ```
+    # Disable the default share-file extension and register our custom one.
+    jupyter labextension disable @jupyterlab/filebrowser-extension:share-file
     jupyter labextension install jupyterhub-share-link-labextension
     pip install jupyterhub-share-link-labextension
     jupyter serverextension enable --py jupyterhub_share_link_serverextension --sys-prefix
