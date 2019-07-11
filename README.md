@@ -109,23 +109,15 @@ in a server running the same container image as that which it was shared from.
     python -m jupyterhub_share_link.generate_keys
     ```
 
-3. Clone [jupyter-share-link-labextension](https://github.com/danielballan/jupyterhub-share-link-labextension)
-   which includes a JupyterLab extension for the front-end and a Jupyter server
-   extension for the back-end.
+3. Install the labextension and the server extension into the user environment.
 
     ```
-    git clone https://github.com/danielballan/jupyterhub-share-link-labextension
-    ```
-
-4. Install the labextension and the server extension into the user environment.
-
-    ```
-    pip install jupyterhub-share-link-labextension/
-    jupyter labextension install jupyterhub-share-link-labextension/
+    jupyter labextension install jupyterhub-share-link-labextension
+    pip install jupyterhub-share-link-labextension
     jupyter serverextension enable --py jupyterhub_share_link_serverextension --sys-prefix
     ```
 
-5. Start JupyterHub using an example configuration provided in this repo. (In
+4. Start JupyterHub using an example configuration provided in this repo. (In
    order to be able to log in as multiple users, you will likely need to run
    this as root.)
 
@@ -133,16 +125,16 @@ in a server running the same container image as that which it was shared from.
     jupyterhub -f example_config_no_containers.py
     ```
 
-6. Log in as a sytem user and start the user's server.
+5. Log in as a sytem user and start the user's server.
 
-7. Create and save a notebook ``Untitled.ipynb`` to share.
+6. Create and save a notebook ``Untitled.ipynb`` to share.
 
-8. Click the share button, the paper airplane icon on the left side of the
+7. Click the share button, the paper airplane icon on the left side of the
    notebook toolbar. Click the button to copy the link.
 
-9. Log in as a different user and paste the shared link.
+8. Log in as a different user and paste the shared link.
 
-10. The notebook will be copied to that user's server and opened.
+9. The notebook will be copied to that user's server and opened.
 
 ## Design
 
@@ -158,7 +150,8 @@ This involves:
   "share" links that it can verify the recipient has not tampered with.
 * A small notebook server extension for exposing ``JUPYTER_IMAGE_SPEC``, an
   environment variable in a new server REST endpoint, and a labextension that
-  adds button to the notebook toolbar. These are kept in
+  customizes the behavior of the 'Copy Share Link' context menu item.
+  Bother the server extension and the labextension are in the repository
   [danielballan/jupyterhub-share-link-labextension](https://github.com/danielballan/jupyterhub-share-link-labextension).
 
 The file-copying occurs via the notebook's ContentsManager, so there is no need
