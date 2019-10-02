@@ -57,12 +57,10 @@ in a server running the same container image as that which it was shared from.
 
 ### With Containers
 
-1. Clone this repository and install it.
+1. Install using pip.
 
     ```
-    git clone https://github.com/danielballan/jupyterhub-share-link
-    cd jupyterhub-share-link
-    pip install .
+    pip install jupyterhub-share-link
     ```
 
 2. Install [DockerSpawner](https://github.com/jupyterhub/dockerspawner).
@@ -102,12 +100,10 @@ in a server running the same container image as that which it was shared from.
 
 ### Without Containers
 
-1. Clone this repository and install it.
+1. Install using pip.
 
     ```
-    git clone https://github.com/danielballan/jupyterhub-share-link
-    cd jupyterhub-share-link
-    pip install .
+    pip install jupyterhub-share-link
     ```
 
 2. Generate a key pair that will be used to sign and verify share links.
