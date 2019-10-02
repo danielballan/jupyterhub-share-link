@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 import json
 import os
 import pathlib
+import sys
 import uuid
 
 import jwt
+import tornado.options
 from jupyterhub.services.auth import HubAuthenticated
 from jupyterhub.utils import url_path_join
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
@@ -46,12 +48,33 @@ class CreateSharedLink(HubAuthenticated, RequestHandler):
                 403, (f"expiration_time must no more than two days "
                       f"from now (current max: {max_time.timestamp()})")
             )
+        current_user = self.get_current_user()
+
+        # In JupyterLab 2.0, the front-end will be able to tell us the name of
+        # the server that this request came from, Until then, it can only give
+        # us the server's base URL. To map that to a server name, we have to
+        # loop through the dict of servers and find the matching URL. Once we
+        # have the name, we can look it up directly.
+        launcher = Launcher(current_user, self.hub_auth.api_token)
+        resp = await launcher.api_request(
+            url_path_join('users', current_user['name']),
+            method='GET',
+        )
+        source_user_data = json.loads(resp.body.decode('utf-8'))
+        for server in (source_user_data['servers'] or {}).values():
+            if server['url'] == data['base_url']:
+                source_server = server
+                break
+        else:
+            raise RuntimeError(
+                "The server that issued this request can't be found."
+                "This is likely a bug in jupyter-share-link or "
+                "jupyter-share-link-labextension.")
 
         payload = {
-            'user': self.get_current_user()['name'],
-            'image': data['image'],
+            'user': current_user['name'],
             'path': data['path'],
-            'server_name': data.get('server_name', ''),
+            'opts': source_server['user_options'],
             'exp': expiration_time
         }
         token = jwt.encode(payload, private_key, algorithm="RS256")
@@ -81,8 +104,7 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
             )
 
         source_username = token['user']
-        source_server_name = token['server_name']
-        image = token['image']
+        user_options = token['opts']
         source_path = token['path']
         dest_path = self.get_argument('dest_path',
                                       os.path.basename(source_path))
@@ -96,45 +118,56 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
         base_url = f'{self.request.protocol}://{self.request.host}'
         headers = {'Authorization': f'token {launcher.hub_api_token}'}
 
+        resp = await launcher.api_request(
+            url_path_join('users', source_username),
+            method='GET',
+        )
+        source_user_data = json.loads(resp.body.decode('utf-8'))
+
+        # Find a source server with matching user_options, or start one.
+        resp = await launcher.api_request(
+            url_path_join('users', source_username),
+            method='GET',
+        )
+        source_user_data = json.loads(resp.body.decode('utf-8'))
+        for server in (source_user_data['servers'] or {}).values():
+            if server['user_options'] == user_options:
+                source_server_url = server['url']
+                break
+        else:
+            raise NotImmplementedError("Sender must have a server running.")
+
         # Ensure destination has a server to share into.
         # First check to see if any of the currently-running servers have the
-        # same container image as the one we need.
+        # same spawner user_options as the ones we need.
         resp = await launcher.api_request(
             url_path_join('users', current_user['name']),
             method='GET',
         )
         dest_user_data = json.loads(resp.body.decode('utf-8'))
         for server in (dest_user_data['servers'] or {}).values():
-            image_spec_url = url_path_join(base_url,
-                                           server['url'],
-                                           'image-spec')
-            req = HTTPRequest(image_spec_url, headers=headers)
-            resp = await AsyncHTTPClient().fetch(req)
-            this_image = json.loads(resp.body.decode('utf-8')).get('JUPYTER_IMAGE_SPEC')
-            if this_image == image:
-                dest_server_name = server['name']
-                result = server
+            if server['user_options'] == user_options:
+                # Pull the name out specifically because we must obtain it
+                # different in the code path below.
+                target_server_name = server['name']
+                target_server = server
                 break
         else:
-            # No currently-running server has the container image we need.
+            # No currently-running server was spawned with the same
+            # user_options as the one being shared from.
             # Start a new server with a random name.
-            dest_server_name = f'shared-link-{str(uuid.uuid4())[:8]}'
-            result = await launcher.launch(image, dest_server_name)
+            target_server_name = f'shared-link-{str(uuid.uuid4())[:8]}'
+            target_server = await launcher.launch(
+                user_options, target_server_name)
 
-            if result['status'] == 'pending':
-                redirect_url = (f"{result['url']}"
+            if target_server['status'] == 'pending':
+                redirect_url = (f"{target_server['url']}"
                                 f"?next={urlquote(self.request.full_url())}")
                 # Redirect to progress bar, and then back here to try again.
                 self.redirect(redirect_url)
-            assert result['status'] == 'running'
+            assert target_server['status'] == 'running'
 
         # Fetch the content we want to copy.
-        resp = await launcher.api_request(
-            url_path_join('users', source_username),
-            method='GET',
-        )
-        source_user_data = json.loads(resp.body.decode('utf-8'))
-        source_server_url = source_user_data['servers'][source_server_name]['url']
         content_url = url_path_join(base_url,
                                     source_server_url,
                                     'api/contents',
@@ -149,13 +182,13 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
         dest_url = url_path_join(base_url,
                                  'user',
                                  to_username,
-                                 dest_server_name,
+                                 target_server_name,
                                  'api/contents/',
                                  dest_path)
         req = HTTPRequest(dest_url, "PUT", headers=headers, body=content)
         resp = await AsyncHTTPClient().fetch(req)
 
-        redirect_url = url_path_join(result['url'], 'lab', 'tree', dest_path)
+        redirect_url = url_path_join(target_server['url'], 'lab', 'tree', dest_path)
 
         # necessary?
         redirect_url = (redirect_url if redirect_url.startswith('/')
@@ -176,6 +209,7 @@ def main():
     url = urlparse(os.environ['JUPYTERHUB_SERVICE_URL'])
 
     http_server.listen(url.port, url.hostname)
+    tornado.options.parse_command_line(sys.argv)
 
     IOLoop.current().start()
 

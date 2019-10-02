@@ -1,5 +1,5 @@
 """
-Launch an image with a temporary user via JupyterHub
+Launch a server with a temporary user via JupyterHub
 
 This file has been vendored from the Python package binderhub. It has been
 vendored rather than imported because binderhub has many other dependencies not
@@ -69,25 +69,24 @@ class Launcher():
         body = json.loads(resp.body.decode('utf-8'))
         return body
 
-    async def launch(self, image, server_name):
-        """Launch a server for a given image
+    async def launch(self, user_options, server_name):
+        """Launch a server for given user_options
         - creates a temporary user on the Hub if authentication is not enabled
         - spawns a server for temporary/authenticated user
         - generates a token
         - returns a dict containing:
           - `url`: the URL of the server
-          - `image`: image spec
+          - `user_options`: dict of user_options for spawner
           - `token`: the token for the server
         """
 
         username = self.user['name']
-        # TODO: validate the image argument?
 
         # data to be passed into spawner's user_options during launch
         # and also to be returned into 'ready' state
-        data = {'image': image,
-                'token': base64.urlsafe_b64encode(
+        data = {'token': base64.urlsafe_b64encode(
                     uuid.uuid4().bytes).decode('ascii').rstrip('=\n')}
+        data.update(user_options)
 
         # # test if exists and early exit if so
         user_data = await self.get_user_data()
@@ -97,8 +96,8 @@ class Launcher():
             return {'status': 'running', 'url': redirect_url}
 
         # start server
-        app_log.info("Starting server %s for user %s with image %s",
-                     server_name, username, image)
+        app_log.info("Starting server %s for user %s with options %s",
+                     server_name, username, user_options)
         try:
             resp = await self.api_request(
                 'users/{}/servers/{}'.format(username, server_name),
@@ -126,16 +125,16 @@ class Launcher():
 
                     if not server['pending']:
                         raise web.HTTPError(
-                            500, ("Image %s for user %s failed to launch"
-                                  % (image, username)))
+                            500, ("Server with options %s for user %s failed to launch"
+                                  % (user_options, username)))
                     # FIXME: make this configurable
                     # FIXME: Measure how long it takes for servers to start
                     # and tune this appropriately
                     await gen.sleep(min(1.4 ** i, 10))
                 else:
                     raise web.HTTPError(
-                        500, ("Image %s for user %s took too long to launch"
-                              % (image, username)))
+                        500, ("Server with options %s for user %s took too long to launch"
+                              % (user_options, username)))
 
         except HTTPError as e:
             if e.response:
@@ -145,6 +144,7 @@ class Launcher():
 
             app_log.error("Error starting server {} for user {}: {}\n{}".
                           format(server_name, username, e, body))
-            raise web.HTTPError(500, "Failed to launch image %s" % image)
+            raise web.HTTPError(500, "Failed to launch with options %s" %
+                    user_options)
 
         return {'url': '/user/%s/%s' % (username, server_name), 'status': 'running'}
