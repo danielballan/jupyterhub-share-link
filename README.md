@@ -17,6 +17,14 @@ pastes the link into his browser. He is given a copy of Alice's notebook.
 
 ![Demo](https://github.com/danielballan/jupyterhub-share-link/blob/master/demo.gif?raw=true)
 
+## JupyterHub Compatibility
+
+* jupyterhub-share-link v0.0.1 is compatible with JupyterHub 1.0
+* juptyerhub-share-link v0.1.0 takes a different approach that requires a
+  [one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
+  jupyterhub itself, which has been submitted for consideration for inclusion in
+  jupyterhub
+
 ## Uses and Limitations
 
 This is for low-effort, short-term sharing between users who are on the same
