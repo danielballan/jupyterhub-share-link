@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 import json
 import os
 import pathlib
+import sys
 import uuid
 
 import jwt
+import tornado.options
 from jupyterhub.services.auth import HubAuthenticated
 from jupyterhub.utils import url_path_join
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
@@ -193,6 +195,7 @@ def main():
     url = urlparse(os.environ['JUPYTERHUB_SERVICE_URL'])
 
     http_server.listen(url.port, url.hostname)
+    tornado.options.parse_command_line(sys.argv)
 
     IOLoop.current().start()
 
