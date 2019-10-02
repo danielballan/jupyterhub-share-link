@@ -53,7 +53,8 @@ class CreateSharedLink(HubAuthenticated, RequestHandler):
         # In JupyterLab 2.0, the front-end will be able to tell us the name of
         # the server that this request came from, Until then, it can only give
         # us the server's base URL. To map that to a server name, we have to
-        # request the list of servers and find the matching URL.
+        # loop through the dict of servers and find the matching URL. Once we
+        # have the name, we can look it up directly.
         launcher = Launcher(current_user, self.hub_auth.api_token)
         resp = await launcher.api_request(
             url_path_join('users', current_user['name']),
@@ -73,7 +74,7 @@ class CreateSharedLink(HubAuthenticated, RequestHandler):
         payload = {
             'user': current_user['name'],
             'path': data['path'],
-            'server_name': source_server['name'],
+            'opts': source_server['user_options'],
             'exp': expiration_time
         }
         token = jwt.encode(payload, private_key, algorithm="RS256")
@@ -103,7 +104,7 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
             )
 
         source_username = token['user']
-        source_server_name = token['server_name']
+        user_options = token['opts']
         source_path = token['path']
         dest_path = self.get_argument('dest_path',
                                       os.path.basename(source_path))
@@ -122,7 +123,19 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
             method='GET',
         )
         source_user_data = json.loads(resp.body.decode('utf-8'))
-        source_server = source_user_data['servers'][source_server_name]
+
+        # Find a source server with matching user_options, or start one.
+        resp = await launcher.api_request(
+            url_path_join('users', source_username),
+            method='GET',
+        )
+        source_user_data = json.loads(resp.body.decode('utf-8'))
+        for server in (source_user_data['servers'] or {}).values():
+            if server['user_options'] == user_options:
+                source_server_url = server['url']
+                break
+        else:
+            raise NotImmplementedError("Sender must have a server running.")
 
         # Ensure destination has a server to share into.
         # First check to see if any of the currently-running servers have the
@@ -133,10 +146,11 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
         )
         dest_user_data = json.loads(resp.body.decode('utf-8'))
         for server in (dest_user_data['servers'] or {}).values():
-            if server['user_options'] == source_server['user_options']:
+            if server['user_options'] == user_options:
                 # Pull the name out specifically because we must obtain it
                 # different in the code path below.
                 target_server_name = server['name']
+                target_server = server
                 break
         else:
             # No currently-running server was spawned with the same
@@ -144,7 +158,7 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
             # Start a new server with a random name.
             target_server_name = f'shared-link-{str(uuid.uuid4())[:8]}'
             target_server = await launcher.launch(
-                source_server['user_options'], target_server_name)
+                user_options, target_server_name)
 
             if target_server['status'] == 'pending':
                 redirect_url = (f"{target_server['url']}"
@@ -155,7 +169,7 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
 
         # Fetch the content we want to copy.
         content_url = url_path_join(base_url,
-                                    source_server['url'],
+                                    source_server_url,
                                     'api/contents',
                                     source_path)
         headers = {'Authorization': f'token {launcher.hub_api_token}'}
