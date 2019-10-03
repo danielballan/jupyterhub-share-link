@@ -138,7 +138,7 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
                 source_server_url = server['url']
                 break
         else:
-            raise NotImmplementedError("Sender must have a server running.")
+            raise NotImplementedError("Sender must have a server running.")
 
         # Ensure destination has a server to share into.
         # First check to see if any of the currently-running servers have the
