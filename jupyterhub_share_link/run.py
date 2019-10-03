@@ -13,6 +13,7 @@ from jupyterhub.utils import url_path_join
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
+from tornado.log import app_log
 from tornado.web import Application
 from tornado.web import authenticated
 from tornado.web import RequestHandler
@@ -83,6 +84,7 @@ class CreateSharedLink(HubAuthenticated, RequestHandler):
         link = url_path_join(base_url,
                              os.getenv('JUPYTERHUB_SERVICE_PREFIX'),
                              f'open?token={base64_token.decode()}')
+        app_log.info("Issuing token %s", payload)
         self.write({'link': link})
 
 
@@ -102,6 +104,7 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
                 403, ("Sharing link has an invalid signature. Was it "
                       "copy/pasted in full?")
             )
+        app_log.info("Honoring token %s", token)
 
         source_username = token['user']
         user_options = token['opts']
