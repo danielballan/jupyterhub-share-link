@@ -25,9 +25,6 @@ class Launcher():
         self.hub_api_token = auth
         self.user = user
 
-    def log(self, *args, **kwargs):
-        app_log(*args, **kwargs)
-
     async def api_request(self, url, *args, **kwargs):
         """Make an API request to JupyterHub"""
         headers = kwargs.setdefault('headers', {})
@@ -44,14 +41,14 @@ class Launcher():
             except HTTPError as e:
                 # swallow 409 errors on retry only (not first attempt)
                 if i > 1 and e.code == 409 and e.response:
-                    self.log("Treating 409 conflict on retry as success")
+                    app_log.debug("Treating 409 conflict on retry as success")
                     return e.response
                 # retry requests that fail with error codes greater than 500
                 # because they are likely intermittent issues in the cluster
                 # e.g. 502,504 due to ingress issues or Hub relocating,
                 # 599 due to connection issues such as Hub restarting
                 if e.code >= 500:
-                    self.log("Error accessing Hub API (using %s): %s", request_url, e)
+                    app_log.debug("Error accessing Hub API (using %s): %s", request_url, e)
                     if i == self.retries:
                         # last api request failed, raise the exception
                         raise
