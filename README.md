@@ -57,16 +57,73 @@ here, a local process spawner and a container-based spawner.
 
 ### With Containers
 
-1. Install using pip.
+1. Make this
+  [proposed one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
+  JupyterHub or install it from the PR branch like so:
+
+  ```
+  pip install git+https://github.com/danielballan/jupyterhub@expose-user-options-in-rest-api
+  ```
+
+  Read under the heading, "JupyterHub Compatibility" above for details.
+
+2. Install using pip.
 
     ```
     pip install jupyterhub-share-link
     ```
 
-2. Install [DockerSpawner](https://github.com/jupyterhub/dockerspawner).
+3. Install [DockerSpawner](https://github.com/jupyterhub/dockerspawner).
 
     ```
     pip install dockerspawner
+    ```
+
+4. Generate a key pair that will be used to sign and verify share links.
+
+    ```
+    # creates private.pem and public.pem in the current directory
+    python -m jupyterhub_share_link.generate_keys
+    ```
+
+5. Start JupyterHub using an example configuration provided in this repo.
+
+    ```
+    jupyterhub -f example_config_dockerspawner.py
+    ```
+
+6. Log in with any username and password---for example, ``alice``.
+   (The ``DummyAuthenticator`` is used by this demo configuration.)
+
+7. Spawn a server using the default image,
+   ``danielballan/base-notebook-with-image-spec-extension``.
+
+8. Create and save a notebook ``Untitled.ipynb`` to share.
+
+8. Find ``Untitled.ipynb`` in the file browser and right-click it.
+   A dialog box will appear. Click the button to copy the link.
+
+10. Log in as a different user and paste the shared link.
+
+11. The user will have a new server started running the same image as ``alice``,
+    and the notebook will be copied and opened.
+
+### Without Containers
+
+1. Make this
+  [proposed one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
+  JupyterHub or install it from the PR branch like so:
+
+  ```
+  pip install git+https://github.com/danielballan/jupyterhub@expose-user-options-in-rest-api
+  ```
+
+  Read under the heading, "JupyterHub Compatibility" above for details.
+
+2. Install using pip.
+
+    ```
+    pip install jupyterhub-share-link
     ```
 
 3. Generate a key pair that will be used to sign and verify share links.
@@ -76,17 +133,23 @@ here, a local process spawner and a container-based spawner.
     python -m jupyterhub_share_link.generate_keys
     ```
 
-4. Start JupyterHub using an example configuration provided in this repo.
+4. Install the labextension into the user environment.
 
     ```
-    jupyterhub -f example_config_dockerspawner.py
+    # Disable the default share-file extension and register our custom one.
+    jupyter labextension disable @jupyterlab/filebrowser-extension:share-file
+    jupyter labextension install jupyterhub-share-link-labextension
     ```
 
-5. Log in with any username and password---for example, ``alice``.
-   (The ``DummyAuthenticator`` is used by this demo configuration.)
+5. Start JupyterHub using an example configuration provided in this repo. (In
+   order to be able to log in as multiple users, you will likely need to run
+   this as root.)
 
-6. Spawn a server using the default image,
-   ``danielballan/base-notebook-with-image-spec-extension``.
+    ```
+    jupyterhub -f example_config_no_containers.py
+    ```
+
+6. Log in as a system user and start the user's server.
 
 7. Create and save a notebook ``Untitled.ipynb`` to share.
 
@@ -95,50 +158,7 @@ here, a local process spawner and a container-based spawner.
 
 9. Log in as a different user and paste the shared link.
 
-10. The user will have a new server started running the same image as ``alice``,
-    and the notebook will be copied and opened.
-
-### Without Containers
-
-1. Install using pip.
-
-    ```
-    pip install jupyterhub-share-link
-    ```
-
-2. Generate a key pair that will be used to sign and verify share links.
-
-    ```
-    # creates private.pem and public.pem in the current directory
-    python -m jupyterhub_share_link.generate_keys
-    ```
-
-3. Install the labextension into the user environment.
-
-    ```
-    # Disable the default share-file extension and register our custom one.
-    jupyter labextension disable @jupyterlab/filebrowser-extension:share-file
-    jupyter labextension install jupyterhub-share-link-labextension
-    ```
-
-4. Start JupyterHub using an example configuration provided in this repo. (In
-   order to be able to log in as multiple users, you will likely need to run
-   this as root.)
-
-    ```
-    jupyterhub -f example_config_no_containers.py
-    ```
-
-5. Log in as a system user and start the user's server.
-
-6. Create and save a notebook ``Untitled.ipynb`` to share.
-
-7. Find ``Untitled.ipynb`` in the file browser and right-click it.
-   A dialog box will appear. Click the button to copy the link.
-
-8. Log in as a different user and paste the shared link.
-
-9. The notebook will be copied to that user's server and opened.
+10. The notebook will be copied to that user's server and opened.
 
 ## Design
 
