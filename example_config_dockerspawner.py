@@ -21,20 +21,7 @@ c.Spawner.cmd = ['jupyter-labhub']
 c.JupyterHub.authenticator_class = 'jupyterhub.auth.DummyAuthenticator'
 
 
-class PatchedDockerSpawner(dockerspawner.DockerSpawner):
-    # We need the server to know what image it is using.
-    # The KubeSpawner already does this, added in
-    # https://github.com/jupyterhub/kubespawner/pull/193
-    #
-    # Submitted upstream to dockerspawner in
-    # https://github.com/jupyterhub/dockerspawner/pull/316
-    def get_env(self):
-        env = super().get_env()
-        env['JUPYTER_IMAGE_SPEC'] = self.image
-        return env
-
-
-c.JupyterHub.spawner_class = PatchedDockerSpawner
+c.JupyterHub.spawner_class = dockerspawner.DockerSpawner
 c.DockerSpawner.remove_containers = True
 c.DockerSpawner.image_whitelist = [
     'danielballan/base-notebook-with-jupyterhub-share-labextension',
