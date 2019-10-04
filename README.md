@@ -66,6 +66,13 @@ here, a local process spawner and a container-based spawner.
     ```
 
   Read under the heading, "JupyterHub Compatibility" above for details.
+  The usual [prequisites](https://jupyterhub.readthedocs.io/en/stable/quickstart.html)
+  for installing JupyterHub apply. One expedient way to install node is:
+
+    ```
+    pip install nodeenv
+    nodeenv -p
+    ```
 
 2. Install using pip.
 
@@ -119,6 +126,13 @@ here, a local process spawner and a container-based spawner.
     ```
 
   Read under the heading, "JupyterHub Compatibility" above for details.
+  The usual [prequisites](https://jupyterhub.readthedocs.io/en/stable/quickstart.html)
+  for installing JupyterHub apply. One expedient way to install node is:
+
+    ```
+    pip install nodeenv
+    nodeenv -p
+    ```
 
 2. Install using pip.
 
