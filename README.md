@@ -61,9 +61,9 @@ here, a local process spawner and a container-based spawner.
   [proposed one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
   JupyterHub or install it from the PR branch like so:
 
-  ```
-  pip install git+https://github.com/danielballan/jupyterhub@expose-user-options-in-rest-api
-  ```
+    ```
+    pip install git+https://github.com/danielballan/jupyterhub@expose-user-options-in-rest-api
+    ```
 
   Read under the heading, "JupyterHub Compatibility" above for details.
 
@@ -114,9 +114,9 @@ here, a local process spawner and a container-based spawner.
   [proposed one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
   JupyterHub or install it from the PR branch like so:
 
-  ```
-  pip install git+https://github.com/danielballan/jupyterhub@expose-user-options-in-rest-api
-  ```
+    ```
+    pip install git+https://github.com/danielballan/jupyterhub@expose-user-options-in-rest-api
+    ```
 
   Read under the heading, "JupyterHub Compatibility" above for details.
 
