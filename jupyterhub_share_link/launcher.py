@@ -66,7 +66,7 @@ class Launcher():
         body = json.loads(resp.body.decode('utf-8'))
         return body
 
-    async def launch(self, user_options, server_name):
+    async def launch(self, user_options, server_name, headers):
         """Launch a server for given user_options
         - creates a temporary user on the Hub if authentication is not enabled
         - spawns a server for temporary/authenticated user
@@ -100,6 +100,7 @@ class Launcher():
                 'users/{}/servers/{}'.format(username, server_name),
                 method='POST',
                 body=json.dumps(data).encode('utf8'),
+                headers=headers,
             )
 
             if resp.code == 202:

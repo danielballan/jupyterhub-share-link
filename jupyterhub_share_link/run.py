@@ -113,22 +113,25 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
                                       os.path.basename(source_path))
 
         current_user = self.get_current_user()
-        launcher = Launcher(current_user, self.hub_auth.api_token)
+        source_launcher = Launcher({'name': source_username}, self.hub_auth.api_token)
+        target_launcher = Launcher(current_user, self.hub_auth.api_token)
 
         # HACK
         # The Jupyter Hub API only gives us a *relative* path to the user
         # servers. Use self.request to get at the public proxy URL.
         base_url = f'{self.request.protocol}://{self.request.host}'
-        headers = {'Authorization': f'token {launcher.hub_api_token}'}
+        headers = {'Authorization': f'token {source_launcher.hub_api_token}'}
+        if 'Cookie' in self.request.headers:
+            headers['Cookie'] = self.request.headers['Cookie']
 
-        resp = await launcher.api_request(
+        resp = await source_launcher.api_request(
             url_path_join('users', source_username),
             method='GET',
         )
         source_user_data = json.loads(resp.body.decode('utf-8'))
 
         # Find a source server with matching user_options, or start one.
-        resp = await launcher.api_request(
+        resp = await source_launcher.api_request(
             url_path_join('users', source_username),
             method='GET',
         )
@@ -138,12 +141,23 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
                 source_server_url = server['url']
                 break
         else:
-            raise NotImplementedError("Sender must have a server running.")
+            # No currently-running server was spawned with the same
+            # user_options as the one shared from.
+            # Start a new server with a random name.
+            source_server_name = f'shared-link-{str(uuid.uuid4())[:8]}'
+            pending_server = await source_launcher.launch(
+                user_options, source_server_name, headers=headers)
+            assert pending_server['status'] == 'running'
+            resp = await source_launcher.api_request(
+                url_path_join('users', source_username),
+                method='GET')
+            source_server = json.loads(resp.body.decode('utf-8'))['servers'][source_server_name]
+            source_server_url = server['url']
 
         # Ensure destination has a server to share into.
         # First check to see if any of the currently-running servers have the
         # same spawner user_options as the ones we need.
-        resp = await launcher.api_request(
+        resp = await target_launcher.api_request(
             url_path_join('users', current_user['name']),
             method='GET',
         )
@@ -160,32 +174,30 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
             # user_options as the one being shared from.
             # Start a new server with a random name.
             target_server_name = f'shared-link-{str(uuid.uuid4())[:8]}'
-            target_server = await launcher.launch(
-                user_options, target_server_name)
-
-            if target_server['status'] == 'pending':
-                redirect_url = (f"{target_server['url']}"
-                                f"?next={urlquote(self.request.full_url())}")
-                # Redirect to progress bar, and then back here to try again.
-                self.redirect(redirect_url)
-            assert target_server['status'] == 'running'
+            pending_server = await target_launcher.launch(
+                user_options, target_server_name, headers=headers)
+            assert pending_server['status'] == 'running'
+            resp = await target_launcher.api_request(
+                url_path_join('users', current_user['name']),
+                method='GET')
+            target_server = json.loads(resp.body.decode('utf-8'))['servers'][target_server_name]
 
         # Fetch the content we want to copy.
         content_url = url_path_join(base_url,
                                     source_server_url,
                                     'api/contents',
                                     source_path)
-        headers = {'Authorization': f'token {launcher.hub_api_token}'}
+        headers = {'Authorization': f'token {target_launcher.hub_api_token}'}
+        if 'Cookie' in self.request.headers:
+            headers['Cookie'] = self.request.headers['Cookie']
         req = HTTPRequest(content_url, headers=headers)
         resp = await AsyncHTTPClient().fetch(req)
         content = resp.body
 
         # Copy content into destination server.
-        to_username = launcher.user['name']
+        to_username = target_launcher.user['name']
         dest_url = url_path_join(base_url,
-                                 'user',
-                                 to_username,
-                                 target_server_name,
+                                 target_server['url'],
                                  'api/contents/',
                                  dest_path)
         req = HTTPRequest(dest_url, "PUT", headers=headers, body=content)
