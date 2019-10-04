@@ -163,4 +163,3 @@ for users to be on the same filesystem. They only have to be on the same Hub.
 ## Open Questions
 
 * Encrypt path so that directory structure is not leaked to recipient?
-* If senders server has stopped, do we temporarily start one? Probably not.
