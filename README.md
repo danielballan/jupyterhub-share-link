@@ -113,14 +113,12 @@ here, a local process spawner and a container-based spawner.
     python -m jupyterhub_share_link.generate_keys
     ```
 
-3. Install the labextension and the server extension into the user environment.
+3. Install the labextension into the user environment.
 
     ```
     # Disable the default share-file extension and register our custom one.
     jupyter labextension disable @jupyterlab/filebrowser-extension:share-file
     jupyter labextension install jupyterhub-share-link-labextension
-    pip install jupyterhub-share-link-labextension
-    jupyter serverextension enable --py jupyterhub_share_link_serverextension --sys-prefix
     ```
 
 4. Start JupyterHub using an example configuration provided in this repo. (In
@@ -131,7 +129,7 @@ here, a local process spawner and a container-based spawner.
     jupyterhub -f example_config_no_containers.py
     ```
 
-5. Log in as a sytem user and start the user's server.
+5. Log in as a system user and start the user's server.
 
 6. Create and save a notebook ``Untitled.ipynb`` to share.
 
@@ -155,10 +153,8 @@ This involves:
   ```
 * A public/private key pair that belong to the service, enabling it issue
   "share" links that it can verify the recipient has not tampered with.
-* A small notebook server extension for exposing ``JUPYTER_IMAGE_SPEC``, an
-  environment variable in a new server REST endpoint, and a labextension that
-  customizes the behavior of the 'Copy Share Link' context menu item.
-  Bother the server extension and the labextension are in the repository
+* A labextension that customizes the behavior of the 'Copy Share Link' context
+  menu item, stored at
   [danielballan/jupyterhub-share-link-labextension](https://github.com/danielballan/jupyterhub-share-link-labextension).
 
 The file-copying occurs via the notebook's ContentsManager, so there is no need
