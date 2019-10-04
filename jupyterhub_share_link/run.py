@@ -20,6 +20,7 @@ from tornado.web import RequestHandler
 from urllib.parse import urlparse, quote as urlquote
 
 from .launcher import Launcher
+from ._version import get_versions
 
 
 HubAuthenticated.hub_auth
@@ -212,11 +213,18 @@ class OpenSharedLink(HubAuthenticated, RequestHandler):
         self.redirect(redirect_url)
 
 
+class Info(HubAuthenticated, RequestHandler):
+    version = get_versions()['version']
+
+    async def get(self):
+        self.write({"version": self.version})
+
 def main():
     app = Application(
         [
             (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'create/?', CreateSharedLink),
-            (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'open/?', OpenSharedLink)
+            (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'open/?', OpenSharedLink),
+            (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'/?', Info),
         ]
     )
 

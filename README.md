@@ -20,7 +20,7 @@ pastes the link into his browser. He is given a copy of Alice's notebook.
 ## JupyterHub Compatibility
 
 * jupyterhub-share-link v0.0.1 is compatible with JupyterHub 1.0
-* juptyerhub-share-link v0.1.0 takes a different approach that requires a
+* juptyerhub-share-link v0.1.x takes a different approach that requires a
   [one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
   jupyterhub itself, which has been submitted for consideration for inclusion in
   jupyterhub
@@ -149,8 +149,9 @@ This involves:
 * A stateless Hub Service (in this repository) with the routes:
 
   ```
-  POST /create
-  GET /open
+  POST /create  # issue a shareable link
+  GET /open  # open a shared link
+  GET /  # verion info
   ```
 * A public/private key pair that belong to the service, enabling it issue
   "share" links that it can verify the recipient has not tampered with.
