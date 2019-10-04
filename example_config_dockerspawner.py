@@ -27,6 +27,10 @@ c.DockerSpawner.image_whitelist = [
     'danielballan/base-notebook-with-jupyterhub-share-labextension',
     'danielballan/scipy-notebook-with-jupyterhub-share-labextension',
 ]
+
+# This is only needed until
+# https://github.com/jupyterhub/dockerspawner/pull/315
+# is merged and released.
 c.DockerSpawner.name_template = "{prefix}-{username}-{servername}"
 
 c.Spawner.default_url = '/lab'
