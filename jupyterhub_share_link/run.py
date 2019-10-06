@@ -219,11 +219,31 @@ class Info(HubAuthenticated, RequestHandler):
     async def get(self):
         self.write({"version": self.version})
 
+
+class InspectSharedLink(HubAuthenticated, RequestHandler):
+    async def get(self):
+        unverified_base64_token = self.get_argument('token')
+        unverified_token = base64.urlsafe_b64decode(unverified_base64_token)
+        try:
+            token = jwt.decode(unverified_token, public_key, algorithms='RS256')
+        except jwt.exceptions.ExpiredSignatureError:
+            raise HTTPError(
+                403, "Sharing link has expired. Ask for a fresh link."
+            )
+        except jwt.exceptions.InvalidSignatureError:
+            raise HTTPError(
+                403, ("Sharing link has an invalid signature. Was it "
+                      "copy/pasted in full?")
+            )
+        self.write({'token': token})
+
+
 def main():
     app = Application(
         [
             (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'create/?', CreateSharedLink),
             (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'open/?', OpenSharedLink),
+            (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'inspect/?', InspectSharedLink),
             (os.environ['JUPYTERHUB_SERVICE_PREFIX'] + r'/?', Info),
         ]
     )
