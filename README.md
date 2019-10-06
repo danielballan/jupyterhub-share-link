@@ -183,6 +183,7 @@ This involves:
   ```
   POST /create  # issue a shareable link
   GET /open  # open a shared link
+  GET /inspect  # inspect a shared link
   GET /  # verion info
   ```
 * A public/private key pair that belong to the service, enabling it issue
