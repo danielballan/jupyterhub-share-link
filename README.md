@@ -20,10 +20,9 @@ pastes the link into his browser. He is given a copy of Alice's notebook.
 ## JupyterHub Compatibility
 
 * jupyterhub-share-link v0.0.1 is compatible with JupyterHub 1.0
-* juptyerhub-share-link v0.1.x takes a different approach that requires a
-  [one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
-  jupyterhub itself, which has been submitted for consideration for inclusion in
-  jupyterhub
+* juptyerhub-share-link v0.1.0 and requires JupyterHub 1.1 or higher.
+  Specifically, it requires the one-line change made in
+  [jupyterhub#2755](https://github.com/jupyterhub/jupyterhub/pull/2755).
 
 ## Uses and Limitations
 
@@ -57,47 +56,44 @@ here, a local process spawner and a container-based spawner.
 
 ### With Containers
 
-1. Make this
-  [proposed one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
-  JupyterHub or install it from the PR branch like so:
+1. Install JupyterHub.
 
-    ```
-    pip install git+https://github.com/danielballan/jupyterhub@expose-user-options-in-rest-api
-    ```
+  ```
+  pip install jupyterhub
+  ```
 
-  Read under the heading, "JupyterHub Compatibility" above for details.
   The usual [prequisites](https://jupyterhub.readthedocs.io/en/stable/quickstart.html)
   for installing JupyterHub apply. One expedient way to install node is:
 
-    ```
-    pip install nodeenv
-    nodeenv -p
-    ```
+  ```
+  pip install nodeenv
+  nodeenv -p
+  ```
 
 2. Install using pip.
 
-    ```
-    pip install jupyterhub-share-link
-    ```
+   ```
+   pip install jupyterhub-share-link
+   ```
 
 3. Install [DockerSpawner](https://github.com/jupyterhub/dockerspawner).
 
-    ```
-    pip install dockerspawner
-    ```
+   ```
+   pip install dockerspawner
+   ```
 
 4. Generate a key pair that will be used to sign and verify share links.
 
-    ```
-    # creates private.pem and public.pem in the current directory
-    python -m jupyterhub_share_link.generate_keys
-    ```
+   ```
+   # creates private.pem and public.pem in the current directory
+   python -m jupyterhub_share_link.generate_keys
+   ```
 
 5. Start JupyterHub using an example configuration provided in this repo.
 
-    ```
-    jupyterhub -f example_config_dockerspawner.py
-    ```
+   ```
+   jupyterhub -f example_config_dockerspawner.py
+   ```
 
 6. Log in with any username and password---for example, ``alice``.
    (The ``DummyAuthenticator`` is used by this demo configuration.)
@@ -117,22 +113,19 @@ here, a local process spawner and a container-based spawner.
 
 ### Without Containers
 
-1. Make this
-  [proposed one-line change](https://github.com/jupyterhub/jupyterhub/pull/2755) to
-  JupyterHub or install it from the PR branch like so:
+1. Install JupyterHub.
 
-    ```
-    pip install git+https://github.com/danielballan/jupyterhub@expose-user-options-in-rest-api
-    ```
+  ```
+  pip install jupyterhub
+  ```
 
-  Read under the heading, "JupyterHub Compatibility" above for details.
   The usual [prequisites](https://jupyterhub.readthedocs.io/en/stable/quickstart.html)
   for installing JupyterHub apply. One expedient way to install node is:
 
-    ```
-    pip install nodeenv
-    nodeenv -p
-    ```
+  ```
+  pip install nodeenv
+  nodeenv -p
+  ```
 
 2. Install using pip.
 
